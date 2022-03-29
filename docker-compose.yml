@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  database:
+      container_name: spm-container
+      image: arangodb/arangodb:3.9.0-noavx
+      env_file: ./.env
+      restart: always
+      ports:
+        - 8529:8529
+      volumes:
+        - ./db-data/:/var/lib/arangodb3/
+  api:
+    container_name: spm-api
+    image: 'node:16'
+    env_file: ./.env
+    depends_on:
+      - database
+    environment:
+      - NODE_ENV=development
+      - PORT=9090
+      - DB_HOST=database
+      - DB_PORT=8529
+      - DB_NAME=spm
+      - DB_USER=spm-root
+      - DB_PASS=spmroot
+
+    volumes:
+      - ~/src:/usr/src/app
+
+volumes:
+  db-data:
+  src:

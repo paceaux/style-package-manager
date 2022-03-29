@@ -1,0 +1,28 @@
+{
+    "env": {
+        "browser": false,
+        "commonjs": true,
+        "es2021": true,
+        "jest": true
+    },
+    "extends": ["airbnb-base"],
+    "parserOptions": {
+        "ecmaVersion": 12,
+    },
+    "globals": {
+        "process": true,
+        "describe": true,
+        "test" : true,
+        "expect": true,
+        "beforeAll": true,
+        "afterAll": true,
+        "it": true
+    },
+    "rules": {
+        "max-len": ["error", {"code": 130 }],
+        "valid-jsdoc": "off"
+    },
+    "plugins": [
+        "jsdoc"
+    ],
+}                                          
