@@ -10,19 +10,6 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/users', async (req, res) => {
-  let result = null;
-  try {
-    result = await userService.getAll();
-  } catch (error) {
-    result = {
-      error: 'whoops',
-    };
-  }
-
-  return res.send(result);
-});
-
 router.get('/user/:id', async (req, res) => {
   const result = await userService.get(req.params.id);
   return res.send(result);
