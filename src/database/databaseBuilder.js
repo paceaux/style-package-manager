@@ -29,6 +29,8 @@ class DatabaseBuilder {
       const exists = await collection.exists();
       if (!exists) {
         result = await collection.create({schema});
+      } else if (schema && Object.keys(schema).length > 0) {
+        result = await collection.properties({schema});
       }
     } catch (createCollectionErr) {
       result = createCollectionErr;
