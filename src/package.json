@@ -9,6 +9,7 @@
     "tests-only": "jest",
     "pretest": "npm run --silent lint",
     "test": "npm run --silent tests-only",
+    "database:build": "node database/build.js",
     "start": "node server.js"
   },
   "keywords": [
@@ -19,7 +20,7 @@
   "author": "Frank M. Taylor",
   "license": "MIT",
   "dependencies": {
-    "arangojs": "^5.8.0",
+    "arangojs": "^7.7.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
