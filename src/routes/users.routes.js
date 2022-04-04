@@ -45,6 +45,17 @@ router.post('/user', async (req, res) => {
     result = await userService.create(req.body);
   } catch (error) {
     result = error;
+    if (error.message.includes('Data missing')) {
+      result = {
+        error: error.message,
+      };
+      res.status = 400;
+    } else if (error.message === 'User already exists') {
+      result = {
+        error: error.message,
+      };
+      res.status = 409;
+    }
   }
   return res.send(result);
 });

@@ -1,8 +1,23 @@
 class UserService {
+  static bcrypt = require('bcrypt');
+
   constructor(database, aql) {
     this.database = database;
     this.aql = aql;
     this.collection = this.database.collection('users');
+  }
+
+  static async hashPassword(password) {
+    const salt = await UserService.bcrypt.genSalt(15);
+    const hash = await UserService.bcrypt.hash(password, salt);
+
+    return hash;
+  }
+
+  static async comparePassword(password, hash) { 
+    const result = await UserService.bcrypt.compare(password, hash);
+
+    return result;
   }
 
   async getAll() {
@@ -40,18 +55,47 @@ class UserService {
     return result;
   }
 
+  async getByEmail(email) {
+    let result = null;
+
+    if (!email) {
+      throw new Error('No email provided');
+    }
+    try {
+      result = await this.collection.byExample({ email });
+    } catch (error) {
+      result = {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+    return result;
+  }
+
   async create(data) {
     let result = null;
 
     if (!data) {
-      throw new Error('No data provided');
+      throw new Error('Data missing');
     }
 
-    if (!data.username || !data.email) {
-      throw new Error('No username or email provided');
+    if (!data.email || !data.password) {
+      throw new Error('Data missing:No email or password provided');
     }
+
+    const existingUser = await this.getByEmail(data.email);
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+    const password = await UserService.hashPassword(data.password);
+    const encryptedData = {
+      email: data.email,
+      password,
+    }
+
     try {
-      result = await this.collection.save(data);
+      result = await this.collection.save(encryptedData);
     } catch (error) {
       result = {
         code: error.code,
