@@ -55,6 +55,23 @@ class UserService {
     return result;
   }
 
+  async checkUser(email, password) {
+    let result = null;
+
+    if (!email || !password) {
+      throw new Error('Data missing: No email or password provided');
+    }
+
+    const user = await this.getByEmail(email);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const isValid = await UserService.comparePassword(password, user.password);
+
+    return isValid;
+  }
+
   async getByEmail(email) {
     let result = null;
 
@@ -110,11 +127,11 @@ class UserService {
     let result = null;
 
     if (!id) {
-      throw new Error('No id provided');
+      throw new Error('Data missing: No id provided');
     }
 
     if (!data) {
-      throw new Error('No data provided');
+      throw new Error('Data missing: no user data provided');
     }
     try {
       result = await this.collection.update(id, data);
@@ -132,7 +149,7 @@ class UserService {
     let result = null;
 
     if (!id) {
-      throw new Error('No id provided');
+      throw new Error('Data missing: No id provided');
     }
     try {
       result = await this.collection.remove(id);
