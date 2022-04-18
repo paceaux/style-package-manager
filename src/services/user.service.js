@@ -91,6 +91,18 @@ class UserService {
     return result;
   }
 
+  async doesEmailExist(email) {
+    let result = false;
+
+    try {
+      const user = await this.getByEmail(email);
+      result = !!user;
+    } catch(error) {
+      console.error('Error checking if email exists: ', error);
+    }
+    return result;
+  }
+
   async create(data) {
     let result = null;
 
@@ -102,7 +114,7 @@ class UserService {
       throw new Error('Data missing: No email or password provided');
     }
 
-    const existingUser = await this.getByEmail(data.email);
+    const existingUser = await this.doesEmailExist(data.email);
   
     if (existingUser) {
       throw new Error('User data: Email already exists');
@@ -145,7 +157,7 @@ class UserService {
       let isNewEmailUnique = true;
 
       if (hasNewEmailForUser) {
-        isNewEmailUnique = !(await this.getByEmail(newUserEmail));
+        isNewEmailUnique = !(await this.doesEmailExist(newUserEmail));
       }
 
       if (hasNewEmailForUser && !isNewEmailUnique) {
