@@ -16,12 +16,48 @@ router.get('/user/:id', async (req, res) => {
 });
 
 router.delete('/user/:id', async (req, res) => {
-  const result = await userService.delete(req.params.id);
+  let result = null;
+  try {
+    result = await userService.delete(req.params.id);
+  } catch (error) {
+    result = {
+      error: error.message,
+    };
+    switch (error.message) {
+      case 'Data missing: No id provided':
+        res.status = 400;
+        break;
+      default: 
+        res.status = 500;
+        break;
+    }
+  }
   return res.send(result);
 });
 
 router.put('/user/:id', async (req, res) => {
-  const result = await userService.update(req.params.id, req.body);
+  let result = null;
+  try {
+    result = await userService.update(req.params.id, req.body);
+  } catch (error) {
+    result = {
+      error: error.message,
+    };
+    switch (error.message) {
+      case 'Data missing: No id provided':
+        res.status = 400;
+        break;
+      case 'Data missing: No user data provided':
+        res.status = 400;
+        break;
+      case 'User data: Email already exists':
+        res.status = 409;
+        break;
+      default:
+        res.status = 500;
+        break;
+    }
+  }
   return res.send(result);
 });
 
@@ -31,17 +67,22 @@ router.post('/user', async (req, res) => {
   try {
     result = await userService.create(req.body);
   } catch (error) {
-    result = error;
-    if (error.message.includes('Data missing')) {
-      result = {
-        error: error.message,
-      };
-      res.status = 400;
-    } else if (error.message === 'User already exists') {
-      result = {
-        error: error.message,
-      };
-      res.status = 409;
+    result = {
+      error: error.message,
+    };
+    switch (error.message) {
+      case 'Data missing':
+        res.status = 400;
+        break;
+      case 'Data missing: No email or password provided':
+        res.status = 400;
+        break;
+      case 'User data: Email already exists':
+        res.status = 409;
+        break;
+      default:
+        res.status = 500;
+        break;
     }
   }
   return res.send(result);
