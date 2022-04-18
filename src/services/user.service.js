@@ -41,7 +41,7 @@ class UserService {
     let result = null;
 
     if (!id) {
-      throw new Error('No id provided');
+      throw new Error('Data missing: No id provided');
     }
     try {
       result = await this.collection.document(id);
@@ -56,7 +56,6 @@ class UserService {
   }
 
   async checkUser(email, password) {
-    let result = null;
 
     if (!email || !password) {
       throw new Error('Data missing: No email or password provided');
@@ -64,7 +63,7 @@ class UserService {
 
     const user = await this.getByEmail(email);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('User: Not found');
     }
 
     const isValid = await UserService.comparePassword(password, user.password);
@@ -76,10 +75,12 @@ class UserService {
     let result = null;
 
     if (!email) {
-      throw new Error('No email provided');
+      throw new Error('Data missing: No email provided');
     }
     try {
-      result = await this.collection.byExample({ email });
+      const results = await this.collection.byExample({ email });
+      const nextResult = await results.next();
+      result = nextResult ? nextResult : null;
     } catch (error) {
       result = {
         code: error.code,
@@ -98,13 +99,15 @@ class UserService {
     }
 
     if (!data.email || !data.password) {
-      throw new Error('Data missing:No email or password provided');
+      throw new Error('Data missing: No email or password provided');
     }
 
     const existingUser = await this.getByEmail(data.email);
+  
     if (existingUser) {
-      throw new Error('User already exists');
+      throw new Error('User data: Email already exists');
     }
+
     const password = await UserService.hashPassword(data.password);
     const encryptedData = {
       email: data.email,
@@ -125,16 +128,39 @@ class UserService {
 
   async update(id, data) {
     let result = null;
-
+  
     if (!id) {
       throw new Error('Data missing: No id provided');
     }
-
+    
     if (!data) {
-      throw new Error('Data missing: no user data provided');
+      throw new Error('Data missing: No user data provided');
     }
+
+    if (data.email) {
+      const newUserEmail = data.email;
+      const oldUser = await this.get(id);
+      const oldUserEmail = oldUser.email;
+      const hasNewEmailForUser = oldUserEmail !== newUserEmail;
+      let isNewEmailUnique = true;
+
+      if (hasNewEmailForUser) {
+        isNewEmailUnique = !(await this.getByEmail(newUserEmail));
+      }
+
+      if (hasNewEmailForUser && !isNewEmailUnique) {
+        throw new Error('User data: Email already exists');
+      }
+    }
+
+    if (data.password) {
+      const password = await UserService.hashPassword(data.password);
+      data.password = password;
+    }
+
     try {
-      result = await this.collection.update(id, data);
+      const updateResult = await this.collection.update(id, data, { returnNew: true, returnOld: true});
+      result = updateResult.new;
     } catch (error) {
       result = {
         code: error.code,
