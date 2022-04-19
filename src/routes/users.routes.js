@@ -16,7 +16,7 @@ router.get('/user/:id', authenticateToken, async (req, res) => {
   return res.send(result);
 });
 
-router.delete('/user/:id', async (req, res) => {
+router.delete('/user/:id', authenticateToken, async (req, res) => {
   let result = null;
   try {
     result = await userService.delete(req.params.id);
@@ -36,7 +36,7 @@ router.delete('/user/:id', async (req, res) => {
   return res.send(result);
 });
 
-router.put('/user/:id', async (req, res) => {
+router.put('/user/:id',authenticateToken, async (req, res) => {
   let result = null;
   try {
     result = await userService.update(req.params.id, req.body);
