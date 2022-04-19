@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const { userService } = require('../services');
+const { authenticateToken } = require('../utils/auth');
 
 router.use((req, res, next) => {
   // eslint-disable-next-line no-console
@@ -10,7 +11,7 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/user/:id', async (req, res) => {
+router.get('/user/:id', authenticateToken, async (req, res) => {
   const result = await userService.get(req.params.id);
   return res.send(result);
 });
@@ -25,10 +26,10 @@ router.delete('/user/:id', async (req, res) => {
     };
     switch (error.message) {
       case 'Data missing: No id provided':
-        res.status = 400;
+        res.status(400);
         break;
       default:
-        res.status = 500;
+        res.status(500);
         break;
     }
   }
@@ -45,16 +46,16 @@ router.put('/user/:id', async (req, res) => {
     };
     switch (error.message) {
       case 'Data missing: No id provided':
-        res.status = 400;
+        res.status(400);
         break;
       case 'Data missing: No user data provided':
-        res.status = 400;
+        res.status(400);
         break;
       case 'User data: Email already exists':
-        res.status = 409;
+        res.status(409);
         break;
       default:
-        res.status = 500;
+        res.status(500);
         break;
     }
   }
@@ -72,16 +73,16 @@ router.post('/user', async (req, res) => {
     };
     switch (error.message) {
       case 'Data missing':
-        res.status = 400;
+        res.status(400);
         break;
       case 'Data missing: No email or password provided':
-        res.status = 400;
+        res.status(400);
         break;
       case 'User data: Email already exists':
-        res.status = 409;
+        res.status(409);
         break;
       default:
-        res.status = 500;
+        res.status(500);
         break;
     }
   }

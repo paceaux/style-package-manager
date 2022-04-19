@@ -1,22 +1,11 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
 
 const router = express.Router();
 
 const { userService } = require('../services');
-
-dotenv.config();
-
-function generateAccessToken(user) {
-  return jwt.sign(
-    user,
-    process.env.TOKEN_SECRET,
-    {
-      expiresIn: '2h',
-    },
-  );
-}
+const {
+  generateAccessToken,
+} = require('../utils/auth');
 
 router.use((req, res, next) => {
   // eslint-disable-next-line no-console
