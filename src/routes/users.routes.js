@@ -27,7 +27,7 @@ router.delete('/user/:id', async (req, res) => {
       case 'Data missing: No id provided':
         res.status = 400;
         break;
-      default: 
+      default:
         res.status = 500;
         break;
     }
