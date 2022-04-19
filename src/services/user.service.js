@@ -1,12 +1,24 @@
+/**
+ * @class Service for the user model in the database. This is 
+ */
 class UserService {
   static bcrypt = require('bcrypt');
 
+  /**
+   * @param  {object} database the arango database object
+   * @param  {object} aql the aql query object
+   */
   constructor(database, aql) {
     this.database = database;
     this.aql = aql;
     this.collection = this.database.collection('users');
   }
 
+  /** converts a plain text password to a hash
+   * @param  {string} password
+   *
+   * @return {string} the hashed password
+   */
   static async hashPassword(password) {
     const salt = await UserService.bcrypt.genSalt(15);
     const hash = await UserService.bcrypt.hash(password, salt);
@@ -14,12 +26,21 @@ class UserService {
     return hash;
   }
 
+  /**
+   * @param  {string} password
+   * @param  {string} hash
+   *
+   * @return {boolean} true if the password matches the hash
+   */
   static async comparePassword(password, hash) { 
     const result = await UserService.bcrypt.compare(password, hash);
 
     return result;
   }
 
+  /**
+   * @returns {Promise<Array|null>} all users
+   */
   async getAll() {
     let result = null;
 
@@ -37,6 +58,11 @@ class UserService {
     return result;
   }
 
+  /** gets a single user by id
+   * @param  {string} id
+   *
+   * @return {Promise<object|null>} the user
+   */
   async get(id) {
     let result = null;
 
@@ -55,6 +81,12 @@ class UserService {
     return result;
   }
 
+  /** Checks if user's password and email are valid
+   * @param  {string} [email]
+   * @param  {string} [password]
+   *
+   * @return {Promise<boolean>} the user
+   */
   async checkUser(email, password) {
 
     if (!email || !password) {
@@ -71,6 +103,12 @@ class UserService {
     return isValid;
   }
 
+  /**
+   * Gets a user by email (login)
+   * @param  {string} [email]
+   *
+   * @return {Promise<object|null>} the user
+   */
   async getByEmail(email) {
     let result = null;
 
@@ -91,6 +129,12 @@ class UserService {
     return result;
   }
 
+  /**
+   * Determines if a given email exists
+   * @param  {string} email
+   *
+   * @return {Promise<boolean>} true if the email exists
+   */
   async doesEmailExist(email) {
     let result = false;
 
@@ -103,6 +147,26 @@ class UserService {
     return result;
   }
 
+  /**
+   * 
+   * @typedef UserCreationData
+   * @property {string} email
+   * @property {string} password
+   */
+  
+  /**
+   * 
+   * @typedef UserCreatedData
+   * @property {string} email
+   * @property {string} password
+   * @property {string} _key
+   */
+
+  /**
+   * @param  {UserData} data
+   *
+   * @return {Promise<UserCreatedData>} the created user
+   */
   async create(data) {
     let result = null;
 
@@ -138,6 +202,11 @@ class UserService {
     return result;
   }
 
+  /**
+   * Updates a user
+   * @param  {string} id the _key of the user
+   * @param  {UserCreatedData} data
+   */
   async update(id, data) {
     let result = null;
   
@@ -183,6 +252,11 @@ class UserService {
     return result;
   }
 
+  /**
+   * Deletes a user
+   * @param  {string} id the _key of the user
+   * @return {Promise<boolean>} true if the user was deleted
+   */
   async delete(id) {
     let result = null;
 
