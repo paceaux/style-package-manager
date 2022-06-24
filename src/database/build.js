@@ -16,6 +16,20 @@ const collectionsMap = new Map([
       message: 'a package must have a name and description',
     },
   }],
+  ['files', {
+    rule: {
+      properties: {
+        name: { type: 'string' },
+        content: { type: 'string' },
+        language: { type: 'string' },
+        created: { type: 'string' },
+        modified: { type: 'string' },
+      },
+    },
+    required: ['name', 'content', 'language'],
+    level: 'new',
+    message: 'a file must have a name, content, and language',
+  }],
   ['user_profiles', {
     rule: {
       properties: {
