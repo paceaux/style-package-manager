@@ -68,7 +68,7 @@ class FileService {
     return result;
   }
 
-  async update(id, fileData) {
+  async update(id, fileData, options = { returnNew: true }) {
     let result = null;
 
     if (!id) {
@@ -85,7 +85,7 @@ class FileService {
     newFileData.modified = new Date().toISOString();
 
     try {
-      result = await this.collection.update(newFileData);
+      result = await this.collection.update(id, newFileData, options);
     } catch (error) {
       result = {
         code: error.code,
