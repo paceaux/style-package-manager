@@ -16,7 +16,22 @@ const collectionsMap = new Map([
       message: 'a package must have a name and description',
     },
   }],
-  ['user_profiles', {}],
+  ['user_profiles', {
+    rule: {
+      properties: {
+        username: { type: 'string' },
+        bio: { type: 'string' },
+        phone: { type: 'string' },
+        website: { type: 'string' },
+        github: { type: 'string' },
+        twitter: { type: 'string' },
+        image: { type: 'string' },
+      },
+      required: ['username'],
+      level: 'new',
+      message: 'a user profile must have a username',
+    },
+  }],
   ['users', {
     rule: {
       properties: {
