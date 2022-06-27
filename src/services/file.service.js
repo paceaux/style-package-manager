@@ -28,8 +28,12 @@ class FileService {
     if (!id) {
       throw new Error('No id provided');
     }
+
+    // the key is just the number, the id is 'files/id'
+    const documentId = id.indexOf('files') === -1 ? `files/${id}` : id;
+
     try {
-      result = await this.collection.document(id);
+      result = await this.collection.document(documentId);
     } catch (error) {
       result = {
         code: error.code,
