@@ -7,11 +7,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch via NPM",
-            "cwd": "${workspaceFolder}",
-            "runtimeVersion": "16.14.0",
-            "program": "${workspaceFolder}/server.js",
-            "runtimeExecutable": "/Users/frtaylor/.nvm/versions/node/v16.14.2/bin/node"
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/api/server.js"
         }
     ]
 }
