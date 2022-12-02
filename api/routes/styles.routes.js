@@ -23,18 +23,18 @@ router.use((req, res, next) => {
 //   return res.send(result);
 // });
 
-router.get('/style/:name', async (req, res) => {
-  const result = await fileService.getLatest(req.params.name);
-  return res.send(result);
+router.get('/style/:styleId', async (req, res) => {
+  const results = await fileService.getByStyleId(req.params.styleId);
+  return res.send(results[0]);
 });
 
-router.get('/style/:name/all', async (req, res) => {
-  const result = await fileService.getByName(req.params.name);
-  return res.send(result);
+router.get('/style/:styleId/all', async (req, res) => {
+  const results = await fileService.getByStyleId(req.params.styleId);
+  return res.send(results);
 });
 
-router.get('/style/:name/:version', async (req, res) => {
-  const versions = await fileService.getByName(req.params.name);
+router.get('/style/:styleId/:version', async (req, res) => {
+  const versions = await fileService.getByStyleId(req.params.styleId);
   let result = null;
 
   if (versions.length === 1) {
@@ -48,10 +48,10 @@ router.get('/style/:name/:version', async (req, res) => {
   return res.send(result);
 });
 
-// router.delete('/style/:id', async (req, res) => {
-//   const result = await fileService.delete(req.params.id);
-//   return res.send(result);
-// });
+router.delete('/style/:id', async (req, res) => {
+  const result = await fileService.delete(req.params.id);
+  return res.send(result);
+});
 
 // router.put('/style/:id', async (req, res) => {
 //   const result = await fileService.update(req.params.id, req.body);

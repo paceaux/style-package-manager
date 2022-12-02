@@ -5,6 +5,25 @@ class FileService {
     this.collection = this.database.collection('files');
   }
 
+  static getLatest(results) {
+    let result = null;
+
+    try {
+      [result] = results.sort((a, b) => {
+        if (a.version > b.version) return -1;
+        if (a.version < b.version) return 1;
+        return 0;
+      });
+      return result;
+    } catch (error) {
+      return {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
   async getAll() {
     let result = null;
 
@@ -55,6 +74,7 @@ class FileService {
       result = await this.database.query(this.aql`
         FOR file in files
           FILTER file.name == ${name}
+          SORT file.version ASC
           RETURN file
       `);
       const results = result.all();
@@ -68,24 +88,26 @@ class FileService {
     }
   }
 
-  async getLatest(name) {
+  async getByStyleId(id) {
     let result = null;
 
     try {
-      const results = await this.getByName(name);
-      [result] = results.sort((a, b) => {
-        if (a.version > b.version) return -1;
-        if (a.version < b.version) return 1;
-        return 0;
-      });
-      return result;
+      const filesCursor = await this.database.query(this.aql`
+        FOR file in files
+          FILTER file._key == ${id} || file.styleId == ${id}
+          SORT file.version DESC
+          RETURN file
+      `);
+      const results = await filesCursor.all();
+      result = results;
     } catch (error) {
-      return {
+      result = {
         code: error.code,
         message: error.message,
         stack: error.stack,
       };
     }
+    return result;
   }
 
   async create(data) {
@@ -102,7 +124,7 @@ class FileService {
     const now = new Date();
     const created = now.toISOString();
     const modified = created;
-    const version = 1;
+    const version = 0;
     const newData = {
       created,
       modified,
@@ -130,11 +152,13 @@ class FileService {
       throw new Error('No id provided');
     }
 
-    const existingFile = await this.get(id);
-
+    const existingFiles = await this.getByStyleId(id);
+    const [existingFile] = existingFiles;
     const newFileData = { ...fileData };
 
     newFileData.created = existingFile.created;
+    newFileData.styleId = existingFile.styleId ? existingFile.styleId : id;
+    // eslint-disable-next-line no-underscore-dangle
     newFileData.previous = existingFile._key;
     newFileData.version = existingFile.version + 1;
     newFileData.modified = new Date().toISOString();
