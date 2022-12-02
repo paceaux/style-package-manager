@@ -44,9 +44,53 @@ class FileService {
     return result;
   }
 
-  async create(data) {
+  async getByName(name) {
     let result = null;
 
+    if (!name) {
+      throw new Error('No name provided');
+    }
+
+    try {
+      result = await this.database.query(this.aql`
+        FOR file in files
+          FILTER file.name == ${name}
+          RETURN file
+      `);
+      const results = result.all();
+      return results;
+    } catch (error) {
+      return {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  async getLatest(name) {
+    let result = null;
+
+    try {
+      const results = await this.getByName(name);
+      [result] = results.sort((a, b) => {
+        if (a.version > b.version) return -1;
+        if (a.version < b.version) return 1;
+        return 0;
+      });
+      return result;
+    } catch (error) {
+      return {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      };
+    }
+  }
+
+  async create(data) {
+    let result = null;
+    // TODO: a create on something of same name creates new version?
     if (!data) {
       throw new Error('No data provided');
     }
@@ -58,7 +102,13 @@ class FileService {
     const now = new Date();
     const created = now.toISOString();
     const modified = created;
-    const newData = { created, modified, ...data };
+    const version = 1;
+    const newData = {
+      created,
+      modified,
+      version,
+      ...data,
+    };
 
     try {
       result = await this.collection.save(newData);
@@ -72,6 +122,7 @@ class FileService {
     return result;
   }
 
+  // update should never alter a record. it should create a new one
   async update(id, fileData, options = { returnNew: true }) {
     let result = null;
 
@@ -79,17 +130,19 @@ class FileService {
       throw new Error('No id provided');
     }
 
+    const existingFile = await this.get(id);
+
     const newFileData = { ...fileData };
 
-    // don't ever modify the created date. it's immutable
-    if (newFileData.created) {
-      delete newFileData.created;
-    }
-
+    newFileData.created = existingFile.created;
+    newFileData.previous = existingFile._key;
+    newFileData.version = existingFile.version + 1;
     newFileData.modified = new Date().toISOString();
+    if (!fileData.name) newFileData.name = existingFile.name;
+    if (!fileData.language) newFileData.language = existingFile.language;
 
     try {
-      result = await this.collection.update(id, newFileData, options);
+      result = await this.collection.save(newFileData);
     } catch (error) {
       result = {
         code: error.code,
